@@ -1,0 +1,113 @@
+### STIG Automation Script created by Tafara Mahlahla ###
+ 
+stig_host=`hostname`
+STIG_number=SRG-APP-000122-AS-000082
+output_txt="$STIG_number"_"$stig_host".txt
+stig_output_backup=bak/"$output_txt"_bak
+qualified_output=/u/wesadm/was_scripts_jsmJan2016/STIGS/temp
+stig_output_file=$qualified_output/$output_txt
+qualified_backup=/u/wesadm/was_scripts_jsmJan2016/STIGS/bak
+stig_output_backup=$qualified_backup/"$output_txt"_bak
+ 
+ 
+base_dir=/prod/wesadm/wes/was*/base
+base_dir_actual=`echo $base_dir`
+ 
+dmgr_dir=/prod/wesadm/wes/was*/dmgr
+dmgr_dir_actual=`echo $dmgr_dir`
+ 
+ 
+echo $output_txt
+ 
+echo $dmgr_dir_actual
+ 
+#echo $stig_host
+ 
+#echo $stig_output_file
+ 
+if [[ -f $stig_output_file ]]
+ 
+then
+   echo "$stig_output_file exists, one backup will be created"
+ 
+        mv $stig_output_file $stig_output_backup
+ 
+##### Just in case the move fails for some reason
+ 
+        rm -r $stig_output_file
+ 
+else
+   echo "$stig_output_file does not exist, it will be created automatically."
+ 
+###   exit 1;
+fi
+ 
+###### Create Output File ######
+ 
+touch $stig_output_file
+ 
+###### Add STIG number and other inputs to output file ######
+ 
+echo $STIG_number >> $stig_output_file
+ 
+hostname >> $stig_output_file
+ 
+date >> $stig_output_file
+ 
+echo -e "###################### Data Collection Below #########################\n" >> $stig_output_file
+ 
+###### ADD DATA COLLECTION SCRIPT CONTENTS HERE ######
+ 
+ 
+if [[ -d $dmgr_dir_actual ]]
+ 
+then
+   echo "$dmgr_dir_actual exists, Deployment Manager is on this server" >> $stig_output_file
+ 
+grep -E 'SecurityRoleExt' `find /prod/wesadm/wes/was*/*/profiles/*/config/cells/* -name admin-authz.xml` >> $stig_output_file
+ 
+else
+   echo "$dmgr_dir_actual does not exist, There is no Deployment Manager on this Server " >> $stig_output_file
+ 
+###   exit 1;
+fi
+ 
+ 
+################################# End Script #####################
+ 
+######### xargs example
+ 
+SRG-APP-000080-AS-000045.sh:find /prod/wesadm/wes/was*/*/profiles/*/config/cells/* -name serverindex.xml -type f | xargs grep -i -e 'endPointName' -e 'port' >> $stig_output_file
+SRG-APP-000142-AS-000014.sh:find /prod/wesadm/wes/was*/*/profiles/*/config/cells/* -name serverindex.xml -type f | xargs grep -i -e 'endPointName' -e 'port' >> $stig_output_file
+SRG-APP-000172-AS-000120.sh:find /prod/wesadm/wes/was*/*/profiles/*/config/cells/* -name security.xml -type f | xargs grep -i -e 'enabled="true" cacheTimeout' -e 'sslConfig="SSLConfig_1"' >> $stig_output_file
+SRG-APP-000206-AS-000145.sh:find /prod/wesadm/wes/was*/*/profiles/*/config/cells/* -name security.xml -type f | xargs grep -i -e 'CSIv2 Inbound' -e 'LTPA|BASICAUTH' -e 'RMI_INBOUND' -e 'JAASLoginModule_16' -e 'JAASLoginModule_17' >> $stig_output_file
+SRG-APP-000211-AS-000146.sh:find /prod/wesadm/wes/was*/dmgr/profiles/*/config/cells/* -name server.xml -type f | xargs grep -i -e 'DEPLOYMENT_MANAGER' -e 'WC_adminhost' >> $stig_output_file
+SRG-APP-000211-AS-000146.sh:find /prod/wesadm/wes/was*/base/profiles/*/config/cells/* -name server.xml -type f | xargs grep -i -e 'APPLICATION_SERVER' -e 'WC_defaulthost' >> $stig_output_file
+SRG-APP-000356-AS-000202.sh:find /prod/wesadm/wes/was*/dmgr/profiles/*/config/cells/* -name server.xml -type f | xargs grep -i -e '*=info' -e 'clusterName' >> $stig_output_file
+SRG-APP-000442-AS-000259.sh:find /prod/wesadm/wes/was*/*/profiles/*/config/cells/* -name security.xml -type f | xargs grep -i -e 'enabled="true" cacheTimeout' -e 'sslConfig="SSLConfig_1"' >> $stig_output_file
+ 
+ 
+ 
+############ Validation execution component outside ###########################
+ 
+ 
+ls -ltr /prod/wesadm/wes/was*/dmgr/profiles/*/config/cells
+ 
+if [ "$?" != "0" ];
+ 
+then
+    echo "No Deployment Manager on this Server"
+ 
+        exit 0;
+else
+    echo "Deployment Manager exists on this server"
+ 
+/$stig_script_home/SRG-ABCD.sh
+x
+x
+x
+x
+ 
+ 
+ 
+fi
